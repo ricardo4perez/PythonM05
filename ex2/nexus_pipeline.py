@@ -125,17 +125,21 @@ class OutputStage:
                 unit = original_data.get("unit", "")
                 analysis = data.get("analysis", {})
                 range_info = analysis.get("range", "")
+                sensor_name = original_data["sensor"]
+                display_name = (
+                    "temperature" if sensor_name == "temp" else sensor_name
+                )
                 return (
-                    f"Processed {original_data['sensor']} reading: "
+                    f"Processed {display_name} reading: "
                     f"{value}°{unit} ({range_info})"
                 )
 
         elif input_type == "csv" and isinstance(original_data, str):
             parsed = data.get("parsed", {})
             count = parsed.get("count", 0)
-            if count > 0:
+            if count >= 2:
                 return (
-                    f"User activity logged: {count - 1} actions processed"
+                    f"User activity logged: {count - 2} actions processed"
                 )
 
         elif input_type == "stream":
