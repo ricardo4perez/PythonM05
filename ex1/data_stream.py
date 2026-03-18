@@ -42,6 +42,8 @@ class DataStream(ABC):
 class SensorStream(DataStream):
     """Stream handler for environmental sensor data"""
 
+    _unit = "readings"
+
     def __init__(self, stream_id: str) -> None:
         super().__init__(stream_id, "Environmental Data")
         self.temperature_sum: float = 0.0
@@ -120,6 +122,8 @@ class SensorStream(DataStream):
 class TransactionStream(DataStream):
     """Stream handler for financial transaction data"""
 
+    _unit = "operations"
+
     def __init__(self, stream_id: str) -> None:
         super().__init__(stream_id, "Financial Data")
         self.net_flow: float = 0.0
@@ -152,7 +156,8 @@ class TransactionStream(DataStream):
                         sell_total += sell_val
 
             self.processed_count += len(data_batch)
-            net = sell_total - buy_total
+            # net_flow: positive = net purchase, negative = net sale
+            net = buy_total - sell_total
             self.net_flow += net
 
             return (
@@ -205,6 +210,8 @@ class TransactionStream(DataStream):
 
 class EventStream(DataStream):
     """Stream handler for system event data"""
+
+    _unit = "events"
 
     def __init__(self, stream_id: str) -> None:
         super().__init__(stream_id, "System Events")
@@ -290,13 +297,16 @@ class StreamProcessor:
 
             if stream_name in data_batches:
                 try:
-                    result = stream.process_batch(
-                        data_batches[stream_name]
-                    )
+                    batch = data_batches[stream_name]
+                    stream.process_batch(batch)
                     class_display = stream.__class__.__name__.replace(
                         'Stream', ''
                     )
-                    results.append(f"- {class_display} data: {result}")
+                    unit = getattr(stream, '_unit', 'items')
+                    results.append(
+                        f"- {class_display} data: "
+                        f"{len(batch)} {unit} processed"
+                    )
                 except Exception as e:
                     results.append(
                         f"- {stream.__class__.__name__} error: {str(e)}"

@@ -194,7 +194,7 @@ def main() -> None:
         print(f"Result {i}: {result}")
 
     print()
-    print("Foundation systems online. Nexus ready for advanced streams")
+    print("Foundation systems online. Nexus ready for advanced streams.")
 
 
 if __name__ == "__main__":
